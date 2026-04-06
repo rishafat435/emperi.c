@@ -1,23 +1,36 @@
 #include <notcurses/notcurses.h>
+#include <locale.h>
+
+typedef struct notcurses_options notcurses_options;
+typedef struct notcurses notcurses;
+typedef struct ncplane ncplane;
 
 int main(void)
 {
-    struct notcurses_options opts = {
-        .flags = NCOPTION_SUPPRESS_BANNERS};
+    setlocale(LC_ALL, "");
 
-    struct notcurses *nc = notcurses_init(&opts, NULL);
-    if (nc == NULL)
+    notcurses_options ncr_settings = {
+        .loglevel = NCLOGLEVEL_SILENT,
+        .margin_b = 0,
+        .margin_l = 0,
+        .margin_r = 0,
+        .margin_t = 0,
+        .flags = NCOPTION_SUPPRESS_BANNERS,
+    };
+
+    notcurses *ncopen = notcurses_init(&ncr_settings, NULL);
+    if (ncopen == NULL)
     {
+        fprintf(stderr, "Didnt open");
         return 1;
     }
 
-    struct ncplane *std = notcurses_stdplane(nc);
-    ncplane_set_fg_rgb8(std, 0, 255, 100);
-    ncplane_putstr_yx(std, 5, 10, "empiric.c is alive.");
-    notcurses_render(nc);
+    ncplane *win0 = notcurses_stdplane(ncopen);
 
-    notcurses_get_blocking(nc, NULL);
-    notcurses_stop(nc);
+    ncplane_printf_yx(win0, 10, 10, "Well first succesfull notcurses code 😁");
+    notcurses_render(ncopen);
+    notcurses_get_blocking(ncopen, NULL);
+
+    notcurses_stop(ncopen);
     return 0;
 }
-
